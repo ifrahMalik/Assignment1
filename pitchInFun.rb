@@ -5,7 +5,7 @@ Dr. Pulimood
 Assignment 1
 =end
 
-require 'csv'
+require 'csv'hahahalolsuironaldobopsycobumtalkstofriendstoomuch30minutecall
 
 #initialzing hashmaps
 event = {}
