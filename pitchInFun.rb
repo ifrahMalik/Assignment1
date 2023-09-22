@@ -49,12 +49,13 @@ sorted_students_hash = Hash[sorted_students]
 
 # hash to store the matched event for each student
 matching_events = {}
-# array to store matching event ID for a student
-matching_event_ids = []
+# # array to store matching event ID for a student
+# matching_event_ids = []
+
 # Iterate through each student
 sorted_students_hash.each do |student_id, student_data|
   student_interests = student_data['Interests']
-  
+  matching_event_ids = []
   # Iterate through each event from valid events hash
   event.each do |event_id, event_data|
     event_issues = event_data['Event-Issues']
@@ -87,6 +88,7 @@ sorted_students_hash.each do |student_id, student_data|
   # Store the matching event ID for student
   matching_events[student_id] = matching_event_ids
 end
+
 
 # handle invalid student interests 
 invalid_interests.each do |student_id|
@@ -141,6 +143,7 @@ matching_events.each do |student_id, event_id|
     unmatched_students_arr << student_id
   end
 end
+puts unmatched_students_arr.length
 
 # puts remaining students into open events
 unmatched_students_arr.each do |student_id, student_data|
@@ -148,14 +151,15 @@ unmatched_students_arr.each do |student_id, student_data|
     assigned_students = event_data['Assigned-Students']
     min_students = event_data['Min-Students']
     max_students = event_data['Max-Students']
+    event_issues = event_data["Event-Issues"]
 
     if (assigned_students >= min_students && assigned_students < max_students)
-      matching_event_ids << event_id
-      matching_events[student_id] = matching_event_ids
+      matching_events[student_id] = event_id
+      unmatched_students = unmatched_students - 1
       # Check if event_data['Roster'] already exists
       if event_data.key?('Roster')
         # If it exists, append roster_data to the existing list
-        event_data['Roster'] << roster
+        event_data['Roster'] << [student_id]
         event[event_id]['Assigned-Students'] += 1
       else
         # If it doesn't exist, initialize it as an array containing roster_data
@@ -166,6 +170,7 @@ unmatched_students_arr.each do |student_id, student_data|
     end
   end
 end
+
 
 # to store all student issues and compare with event to find 'Problem' events
 all_student_issues = []
@@ -201,7 +206,6 @@ CSV.open(outputfile1, 'w') do |csv|
               end
     # Check for 'Problem' status based on event issues not listed by any students
     if status == 'Ok'
-      
       if !(event_issues & all_student_issues).any?
         status = 'Problem'
       end
@@ -219,7 +223,7 @@ number_of_events_with_zero_students = event.values.count { |event_data| event_da
 
 # Write the statistics to a text file
 File.open(outputfile2, 'w') do |file|
-  file.puts "Number of students: #{number_valid_students}"
+  file.puts "Number of valid students: #{number_valid_students}"
   file.puts "Number of events that can run: #{number_of_events_can_run}"
   file.puts "Number of events that may be canceled: #{number_of_events_may_be_canceled}"
   file.puts "Number of events that have 0 students assigned: #{number_of_events_with_zero_students}"
@@ -250,7 +254,7 @@ event.each do |event_id, event_data|
 end
 
 # print summary (outputfile2) to screen
-puts "Number of students: #{number_valid_students}"
+puts "Number of valid students: #{number_valid_students}"
 puts "Number of events that can run: #{number_of_events_can_run}"
 puts "Number of events that may be canceled: #{number_of_events_may_be_canceled}"
 puts "Number of events that have 0 students assigned: #{number_of_events_with_zero_students}"
